@@ -1,0 +1,8 @@
+Scenarios:
+
+1. Tokenize the text into sentences
+2. Tokenize each sentence into a collection of words
+	a. Stop word removal (step 3 included)
+3. Normalize each word with TF-IDF, (Scikit-Learn package)
+4. Convert the sentences into graphs (matrix * matrix^T)
+5. Score the sentences via pagerank (output: sentence -> score)
