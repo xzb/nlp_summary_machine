@@ -8,8 +8,11 @@ from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
 
-class Tokenize(object):
+class TextRank(object):
     def __init__(self):
+        self
+
+    def textrank(self):
         with open("doc.txt", "r") as lofile:
             document = lofile.read().decode('utf-8').replace('\n', ' ').replace('?"', '? "').replace('!"', '! "').replace('."', '. "')
             # document = lofile.read().replace('\n', ' ')
@@ -46,6 +49,7 @@ class Tokenize(object):
 
 #** Run the code **#
 def test():
-    solution = Tokenize()
+    solution = TextRank()
+    solution.textrank()
 
 test()
