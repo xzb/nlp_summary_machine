@@ -4,38 +4,45 @@ __author__ = 'xiezebin'
 import networkx as nx
 import numpy as np
 
-from nltk.tokenize.punkt import PunktSentenceTokenizer
+from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
 
 class Tokenize(object):
     def __init__(self):
-        document = """To Sherlock Holmes she is always the woman. I have
-        seldom heard him mention her under any other name. In his eyes she
-        eclipses and predominates the whole of her sex. It was not that he
-        felt any emotion akin to love for Irene Adler. All emotions, and that
-        one particularly, were abhorrent to his cold, precise but admirably
-        balanced mind. He was, I take it, the most perfect reasoning and
-        observing machine that the world has seen, but as a lover he would
-        have placed himself in a false position. He never spoke of the softer
-        passions, save with a gibe and a sneer. They were admirable things for
-        the observer-excellent for drawing the veil from men’s motives and
-        actions. But for the trained reasoner to admit such intrusions into
-        his own delicate and finely adjusted temperament was to introduce a
-        distracting factor which might throw a doubt upon all his mental
-        results. Grit in a sensitive instrument, or a crack in one of his own
-        high-power lenses, would not be more disturbing than a strong emotion
-        in a nature such as his. And yet there was but one woman to him, and
-        that woman was the late Irene Adler, of dubious and questionable
-        memory.
-        """
+        with open("doc.txt", "r") as lofile:
+            document = lofile.read().decode('utf-8').replace('\n', ' ').replace('?"', '? "').replace('!"', '! "').replace('."', '. "')
+            # document = lofile.read().replace('\n', ' ')
 
-        document = ' '.join(document.strip().split('\n'))
+        # document = ' '.join(document.strip().split('\n'))
 
-        sentence_tokenizer = PunktSentenceTokenizer()
+        # == sentences tokenize ==
+        punkt_param = PunktParameters()
+        punkt_param.abbrev_types = set(['dr', 'vs', 'mr', 'mrs', 'prof', 'inc'])
+        sentence_tokenizer = PunktSentenceTokenizer(punkt_param)
+
+        # document = document.replace('?"', '? "').replace('!"', '! "').replace('."', '. "')
         sentences = sentence_tokenizer.tokenize(document)
 
-        print "";
+
+        wordCounter = CountVectorizer()
+        count_matrix = wordCounter.fit_transform(sentences)
+        # bow_matrix.toarray()
+        normalized_matrix = TfidfTransformer().fit_transform(count_matrix)
+
+        similarity_graph = normalized_matrix * normalized_matrix.T
+
+        nx_graph = nx.from_scipy_sparse_matrix(similarity_graph)
+        scores = nx.pagerank(nx_graph)
+        orderedSentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
+
+
+        with open("doc_textrank.txt", "w") as lofile:
+            for i in range(0, 3):
+                lofile.write(orderedSentences[i][1].encode('ascii', 'ignore'))
+
+
+        print ""
 
 #** Run the code **#
 def test():
