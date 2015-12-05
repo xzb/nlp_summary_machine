@@ -14,27 +14,29 @@ class TextRank(object):
 
     def textrank(self):
         with open("doc.txt", "r") as lofile:
-            document = lofile.read().decode('utf-8').replace('\n', ' ').replace('?"', '? "').replace('!"', '! "').replace('."', '. "')
-            # document = lofile.read().replace('\n', ' ')
+            document = lofile.read()
 
+        # == refine document for process ==
+        document = document.replace('\n', ' ')\
+            .replace('."', '. "').replace('?"', '? "').replace('!"', '! "')\
+            .replace('.”', '. ”').replace('?”', '? ”').replace('!”', '! ”')\
+            .decode('utf-8')
         # document = ' '.join(document.strip().split('\n'))
 
         # == sentences tokenize ==
         punkt_param = PunktParameters()
         punkt_param.abbrev_types = set(['dr', 'vs', 'mr', 'mrs', 'prof', 'inc'])
         sentence_tokenizer = PunktSentenceTokenizer(punkt_param)
-
-        # document = document.replace('?"', '? "').replace('!"', '! "').replace('."', '. "')
         sentences = sentence_tokenizer.tokenize(document)
 
 
+        # == count words for each sentence ==
         wordCounter = CountVectorizer()
         count_matrix = wordCounter.fit_transform(sentences)
-        # bow_matrix.toarray()
         normalized_matrix = TfidfTransformer().fit_transform(count_matrix)
 
+        # == similarity among sentences ==
         similarity_graph = normalized_matrix * normalized_matrix.T
-
         nx_graph = nx.from_scipy_sparse_matrix(similarity_graph)
         scores = nx.pagerank(nx_graph)
         orderedSentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
@@ -43,9 +45,10 @@ class TextRank(object):
         with open("doc_textrank.txt", "w") as lofile:
             for i in range(0, 3):
                 lofile.write(orderedSentences[i][1].encode('ascii', 'ignore'))
-
+                lofile.write("\n")
 
         print ""
+
 
 #** Run the code **#
 def test():
