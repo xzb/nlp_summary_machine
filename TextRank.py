@@ -17,16 +17,14 @@ def stemSen(sentence):
         rvSen += stemmer.stem(word) + " "
     return rvSen
 
-class customCountVectorizer(CountVectorizer):
-    def build_preprocessor(self):
-        return stemSen
+# class customCountVectorizer(CountVectorizer):
+#     def build_preprocessor(self):
+#         return stemSen
+# wordCounter = customCountVectorizer(stop_words='english')                 # approach 2.b: custom class
 
 class TextRank(object):
-    def __init__(self):
-        self
-
-    def textrank(self):
-        with open("doc.txt", "r") as lofile:
+    def rank(self, doc = "doc.txt", out = "doc_textrank.txt", top = 10, stop_word = False, stem = False):
+        with open(doc, "r") as lofile:
             document = lofile.read()
 
         # == refine document for process ==
@@ -47,10 +45,11 @@ class TextRank(object):
 
 
         # == count words for each sentence ==
-        # wordCounter = CountVectorizer()                                            # approach 0: non stop_word & stem
-        # wordCounter = CountVectorizer(stop_words='english')                       # approach 1: only stop_word
-        wordCounter = CountVectorizer(stop_words='english', preprocessor=stemSen)   # approach 2.a: pass function
-        # wordCounter = customCountVectorizer(stop_words='english')                 # approach 2.b: custom class
+        wordCounter = CountVectorizer()                                            # approach 0: non
+        if stop_word:
+            wordCounter = CountVectorizer(stop_words='english')                       # approach 1: only stop_word
+            if stem:
+                wordCounter = CountVectorizer(stop_words='english', preprocessor=stemSen)   # approach 2: stop_word & stem
         count_matrix = wordCounter.fit_transform(sentences)
         normalized_matrix = TfidfTransformer().fit_transform(count_matrix)
 
@@ -66,8 +65,10 @@ class TextRank(object):
         orderedSentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
 
 
-        with open("doc_textrank.txt", "w") as lofile:
-            for i in range(0, len(orderedSentences)):
+        if len(orderedSentences) < top:
+            top = len(orderedSentences)
+        with open(out, "w") as lofile:
+            for i in range(0, top):
                 lofile.write(orderedSentences[i][1].encode('ascii', 'ignore'))
                 lofile.write("\n")
 
@@ -78,7 +79,7 @@ class TextRank(object):
 #** Run the code **#
 def test():
     solution = TextRank()
-    solution.textrank()
+    solution.rank()
 
 test()
 # print stemSen("having having done did")
