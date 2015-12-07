@@ -81,5 +81,5 @@ def test():
     solution = TextRank()
     solution.rank()
 
-test()
+# test()
 # print stemSen("having having done did")
